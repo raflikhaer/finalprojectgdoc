@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <title>Rafli Khalifah Rahman | Frontend Developer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio profesional Rafli Khalifah Rahman - Frontend Developer">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --crimson: #c0182c;
+            --crimson-dim: #7a0f1c;
+            --cream: #f0ebe1;
+            --ink: #0a0705;
+            --ink-light: #1a1210;
+            --muted: #6b5f58;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { cursor: none; }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background-color: var(--ink);
+            color: var(--cream);
+            overflow-x: hidden;
+        }
+
+        /* ── CUSTOM CURSOR ── */
+        #cursor-dot {
+            position: fixed;
+            top: 0; left: 0;
+            width: 8px; height: 8px;
+            background: var(--crimson);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.05s;
+        }
+        #cursor-ring {
+            position: fixed;
+            top: 0; left: 0;
+            width: 36px; height: 36px;
+            border: 1.5px solid rgba(192,24,44,0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: transform 0.18s ease, width 0.2s, height 0.2s, border-color 0.2s;
+        }
+        body:has(a:hover) #cursor-ring,
+        body:has(button:hover) #cursor-ring {
+            width: 56px; height: 56px;
+            border-color: var(--crimson);
+        }
+
+        /* ── NOISE GRAIN ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 9990;
+        }
+
+        /* ── TYPOGRAPHY ── */
+        .display { font-family: 'Instrument Serif', serif; font-style: italic; }
+        .mono    { font-family: 'DM Mono', monospace; }
+
+        /* ── HEADER ── */
+        header {
+            background: rgba(10, 7, 5, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(192,24,44,0.15);
+        }
+
+        /* ── HERO ── */
+        #hero {
+            background: var(--ink);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-grid-line {
+            position: absolute;
+            background: rgba(192,24,44,0.07);
+        }
+        .hero-grid-line.v { width: 1px; height: 100%; top: 0; }
+        .hero-grid-line.h { height: 1px; width: 100%; left: 0; }
+
+        #canvas-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .hero-tag {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--crimson);
+            border: 1px solid rgba(192,24,44,0.3);
+            padding: 6px 14px;
+            display: inline-block;
+            position: relative;
+        }
+        .hero-tag::before, .hero-tag::after {
+            content: '';
+            position: absolute;
+            width: 6px; height: 6px;
+            background: var(--crimson);
+        }
+        .hero-tag::before { top: -3px; left: -3px; }
+        .hero-tag::after  { bottom: -3px; right: -3px; }
+
+        .hero-headline {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(3.5rem, 9vw, 8rem);
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+        }
+
+        .outline-text {
+            -webkit-text-stroke: 1px rgba(240,235,225,0.4);
+            color: transparent;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .scroll-indicator span {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            writing-mode: vertical-rl;
+        }
+        .scroll-line {
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, var(--crimson), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(0.6); }
+        }
+
+        /* ── SECTION DIVIDER ── */
+        .section-num {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            color: var(--crimson);
+        }
+
+        /* ── ABOUT ── */
+        #about { background: var(--ink-light); }
+
+        .stat-card {
+            border: 1px solid rgba(192,24,44,0.2);
+            background: rgba(192,24,44,0.04);
+            transition: background 0.3s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(192,24,44,0.08) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .stat-card:hover { border-color: rgba(192,24,44,0.6); }
+        .stat-card:hover::before { opacity: 1; }
+
+        /* ── SKILLS ── */
+        #skills { background: var(--ink); }
+
+        .skill-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(240,235,225,0.04);
+            border: 1px solid rgba(240,235,225,0.08);
+            border-radius: 100px;
+            padding: 10px 20px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.8rem;
+            color: rgba(240,235,225,0.7);
+            transition: all 0.3s;
+            cursor: default;
+        }
+        .skill-pill:hover {
+            background: rgba(192,24,44,0.12);
+            border-color: rgba(192,24,44,0.4);
+            color: var(--cream);
+        }
+        .skill-pill .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--crimson);
+            flex-shrink: 0;
+        }
+
+        /* ── PROJECTS ── */
+        #projects { background: var(--ink-light); }
+
+        .project-card {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(240,235,225,0.07);
+            transition: border-color 0.4s;
+        }
+        .project-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(10,7,5,0.97) 0%, rgba(10,7,5,0.5) 50%, transparent 100%);
+            transition: background 0.4s;
+        }
+        .project-card:hover { border-color: rgba(192,24,44,0.4); }
+        .project-card:hover::after {
+            background: linear-gradient(to top, rgba(10,7,5,0.99) 0%, rgba(10,7,5,0.65) 60%, rgba(192,24,44,0.1) 100%);
+        }
+        .project-card img {
+            transition: transform 0.8s cubic-bezier(0.33,1,0.68,1), filter 0.4s;
+            filter: saturate(0.6);
+        }
+        .project-card:hover img {
+            transform: scale(1.08);
+            filter: saturate(0.4) brightness(0.8);
+        }
+        .project-info {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 2rem;
+            z-index: 2;
+            transform: translateY(8px);
+            transition: transform 0.4s;
+        }
+        .project-card:hover .project-info { transform: translateY(0); }
+        .project-num {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--crimson);
+            margin-bottom: 8px;
+        }
+        .project-arrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            color: var(--crimson);
+            margin-top: 12px;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.3s 0.1s, transform 0.3s 0.1s;
+        }
+        .project-card:hover .project-arrow { opacity: 1; transform: translateX(0); }
+
+        /* ── JOKES ── */
+        #jokes { background: var(--ink); }
+        .joke-box {
+            border: 1px solid rgba(192,24,44,0.25);
+            background: rgba(192,24,44,0.04);
+            position: relative;
+        }
+        .joke-box::before {
+            content: '"';
+            font-family: 'Instrument Serif', serif;
+            font-size: 8rem;
+            line-height: 1;
+            color: var(--crimson);
+            opacity: 0.12;
+            position: absolute;
+            top: -1rem;
+            left: 1.5rem;
+            pointer-events: none;
+        }
+
+        /* ── CONTACT ── */
+        #contact { background: var(--ink-light); }
+        .input-field {
+            background: rgba(240,235,225,0.04);
+            border: 1px solid rgba(240,235,225,0.1);
+            color: var(--cream);
+            border-radius: 12px;
+            padding: 16px 20px;
+            width: 100%;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .input-field::placeholder { color: rgba(240,235,225,0.25); }
+        .input-field:focus {
+            border-color: rgba(192,24,44,0.6);
+            background: rgba(192,24,44,0.05);
+        }
+        label {
+            display: block;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: rgba(240,235,225,0.4);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: var(--crimson);
+            color: var(--cream);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            padding: 18px 36px;
+            border-radius: 12px;
+            border: none;
+            cursor: none;
+            transition: background 0.3s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-primary:hover { background: #e01f35; transform: translateY(-2px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        /* ── FOOTER ── */
+        footer { background: var(--ink); border-top: 1px solid rgba(240,235,225,0.06); }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fsu { animation: fadeSlideUp 0.9s cubic-bezier(0.22,1,0.36,1) both; }
+        .delay-1 { animation-delay: 0.15s; }
+        .delay-2 { animation-delay: 0.3s; }
+        .delay-3 { animation-delay: 0.45s; }
+        .delay-4 { animation-delay: 0.6s; }
+
+        /* ── NAV LINK ── */
+        .nav-link {
+            position: relative;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(240,235,225,0.55);
+            transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 1px;
+            background: var(--crimson);
+            transition: width 0.3s;
+        }
+        .nav-link:hover { color: var(--cream); }
+        .nav-link:hover::after { width: 100%; }
+        .nav-link.active { color: var(--crimson); }
+
+        /* ── MOBILE MENU ── */
+        #mobile-menu {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #mobile-menu.open {
+            display: flex !important;
+        }
+        .mobile-nav-link {
+            font-family: 'Syne', sans-serif;
+            color: rgba(240,235,225,0.45);
+            transition: color 0.25s, transform 0.25s;
+            text-align: center;
+        }
+        .mobile-nav-link:hover {
+            color: var(--cream);
+            transform: translateX(6px);
+        }
+
+        /* ── MARQUEE ── */
+        .marquee-wrap { overflow: hidden; border-top: 1px solid rgba(240,235,225,0.06); border-bottom: 1px solid rgba(240,235,225,0.06); }
+        .marquee-track {
+            display: flex;
+            white-space: nowrap;
+            animation: marqueeScroll 24s linear infinite;
+        }
+        .marquee-track:hover { animation-play-state: paused; }
+        @keyframes marqueeScroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        .marquee-item {
+            font-family: 'Instrument Serif', serif;
+            font-style: italic;
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            color: rgba(240,235,225,0.08);
+            padding: 0 2rem;
+            flex-shrink: 0;
+        }
+        .marquee-item span { color: var(--crimson); }
+    </style>
+</head>
+
+<body>
+
+<!-- Custom Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ────────────────── HEADER ────────────────── -->
+<header class="sticky top-0 z-[100]">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+        <a href="#hero" class="text-xl font-extrabold tracking-tighter text-cream" style="font-family:'Syne',sans-serif;letter-spacing:-0.04em">
+            RK<span style="color:var(--crimson)">R</span>.
+        </a>
+
+        <nav class="hidden md:flex gap-10">
+            <a href="#about"    class="nav-link">About</a>
+            <a href="#skills"   class="nav-link">Skills</a>
+            <a href="#projects" class="nav-link">Projects</a>
+            <a href="#jokes"    class="nav-link">Lounge</a>
+        </nav>
+
+        <a href="#contact" class="hidden md:inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase border border-red-700 text-crimson px-5 py-2.5 transition-all hover:bg-red-700 hover:text-white" style="font-family:'DM Mono',monospace;color:var(--crimson);border-color:var(--crimson-dim)">
+            Contact <span>→</span>
+        </a>
+
+        <button id="menuToggle" class="md:hidden text-cream p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile Menu — di luar header agar fixed inset-0 benar-benar full screen -->
+<div id="mobile-menu" class="hidden fixed inset-0 flex-col items-center justify-center gap-10" style="z-index:9999;background:rgba(10,7,5,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
+    <button id="menuClose" class="absolute top-6 right-6 text-cream p-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+    <a href="#about"    class="mobile-nav-link text-4xl font-bold tracking-tight">About</a>
+    <a href="#skills"   class="mobile-nav-link text-4xl font-bold tracking-tight">Skills</a>
+    <a href="#projects" class="mobile-nav-link text-4xl font-bold tracking-tight">Projects</a>
+    <a href="#jokes"    class="mobile-nav-link text-4xl font-bold tracking-tight">Lounge</a>
+    <a href="#contact"  class="mobile-nav-link text-4xl font-bold tracking-tight">Contact</a>
+</div>
+
+<!-- ────────────────── HERO ────────────────── -->
+<section id="hero">
+    <canvas id="canvas-bg"></canvas>
+
+    <!-- Grid lines decoration -->
+    <div class="hero-grid-line v" style="left:20%"></div>
+    <div class="hero-grid-line v" style="left:80%"></div>
+    <div class="hero-grid-line h" style="top:30%"></div>
+    <div class="hero-grid-line h" style="top:70%"></div>
+
+    <div class="max-w-7xl mx-auto px-6 min-h-screen flex flex-col justify-center relative z-10 pt-20 pb-32">
+
+        <div class="mb-10 animate-fsu">
+            <span class="hero-tag">Frontend Developer · UI Engineer</span>
+        </div>
+
+        <h1 class="hero-headline animate-fsu delay-1 mb-8">
+            <span class="block">Rafli</span>
+            <span class="block outline-text display">Khalifah</span>
+            <span class="block">Rahman</span>
+        </h1>
+
+        <div class="flex flex-col sm:flex-row gap-6 sm:gap-12 items-start animate-fsu delay-2">
+            <p class="text-base text-cream/50 max-w-xs leading-relaxed" style="font-family:'DM Mono',monospace;font-size:0.8rem">
+                Membangun antarmuka yang fungsional,<br>responsif, dan memukau.
+            </p>
+            <div class="flex gap-4">
+                <a href="#projects" class="flex items-center gap-3 text-sm font-bold tracking-widest uppercase px-7 py-4 bg-red-700 hover:bg-red-600 transition-all text-white" style="background:var(--crimson)">
+                    Lihat Project
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+                <a href="#contact" class="flex items-center text-sm font-bold tracking-widest uppercase px-7 py-4 border border-white/15 hover:border-white/30 transition-all text-cream/70 hover:text-cream">
+                    Kontak
+                </a>
+            </div>
+        </div>
+
+        <!-- Live indicator -->
+        <div class="mt-16 animate-fsu delay-3 flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block"></span>
+            <span class="mono text-xs text-cream/30 tracking-widest">AVAILABLE FOR PROJECTS · 2026</span>
+        </div>
+    </div>
+
+    <div class="scroll-indicator">
+        <div class="scroll-line"></div>
+        <span>SCROLL</span>
+    </div>
+</section>
+
+<!-- ────────────────── MARQUEE ────────────────── -->
+<div class="marquee-wrap py-5 bg-ink-light" style="background:var(--ink-light)">
+    <div class="marquee-track">
+        <span class="marquee-item">HTML5 <span>·</span></span>
+        <span class="marquee-item">CSS3 <span>·</span></span>
+        <span class="marquee-item">JavaScript <span>·</span></span>
+        <span class="marquee-item">Laravel <span>·</span></span>
+        <span class="marquee-item">Flutter <span>·</span></span>
+        <span class="marquee-item">PHP &amp; MySQL <span>·</span></span>
+        <span class="marquee-item">Prompt Engineering <span>·</span></span>
+        <span class="marquee-item">Frontend Dev <span>·</span></span>
+        <!-- Duplicate for seamless loop -->
+        <span class="marquee-item">HTML5 <span>·</span></span>
+        <span class="marquee-item">CSS3 <span>·</span></span>
+        <span class="marquee-item">JavaScript <span>·</span></span>
+        <span class="marquee-item">Laravel <span>·</span></span>
+        <span class="marquee-item">Flutter <span>·</span></span>
+        <span class="marquee-item">PHP &amp; MySQL <span>·</span></span>
+        <span class="marquee-item">Prompt Engineering <span>·</span></span>
+        <span class="marquee-item">Frontend Dev <span>·</span></span>
+    </div>
+</div>
+
+<!-- ────────────────── ABOUT ────────────────── -->
+<section id="about" class="py-28">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row gap-16 md:gap-24 items-start">
+
+            <div class="md:w-1/2" data-aos="fade-right">
+                <div class="section-num mb-4">01 / ABOUT</div>
+                <h2 class="text-4xl md:text-5xl font-extrabold leading-tight mb-8 tracking-tight">
+                    Membangun web<br>
+                    <span class="display" style="color:rgba(240,235,225,0.4)">yang berkesan.</span>
+                </h2>
+                <p class="text-cream/50 leading-relaxed mb-6" style="font-size:0.95rem">
+                    Kemampuan membangun antarmuka yang menarik harus dibarengi dengan struktur kode yang bersih agar aplikasi dapat berjalan efektif di berbagai perangkat.
+                </p>
+                <div class="flex items-center gap-3 mt-6">
+                    <div class="w-12 h-12 rounded-full bg-maroon flex items-center justify-center" style="background:rgba(192,24,44,0.15);border:1px solid rgba(192,24,44,0.25)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--crimson)">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <span class="mono text-sm" style="color:var(--crimson)">raflikhalifahrahman@gmail.com</span>
+                </div>
+            </div>
+
+            <div class="md:w-1/2 grid grid-cols-1 gap-5" data-aos="fade-left" data-aos-delay="100">
+                <div class="stat-card p-7 rounded-2xl">
+                    <div class="text-5xl font-extrabold mb-2 tracking-tighter" style="color:var(--crimson)">3+</div>
+                    <div class="mono text-xs tracking-widest text-cream/40 uppercase">Project Unggulan</div>
+                    <p class="text-cream/50 text-sm mt-2">Aplikasi web & mobile yang sudah di-launch.</p>
+                </div>
+                <div class="stat-card p-7 rounded-2xl">
+                    <div class="text-5xl font-extrabold mb-2 tracking-tighter" style="color:var(--crimson)">UNUGHA</div>
+                    <div class="mono text-xs tracking-widest text-cream/40 uppercase">Sistem Informasi</div>
+                    <p class="text-cream/50 text-sm mt-2">Mahasiswa aktif bidang teknologi informasi.</p>
+                </div>
+                <div class="stat-card p-7 rounded-2xl">
+                    <div class="text-3xl font-extrabold mb-2 tracking-tighter" style="color:var(--crimson)">Dicoding</div>
+                    <div class="mono text-xs tracking-widest text-cream/40 uppercase">AI Scholarship</div>
+                    <p class="text-cream/50 text-sm mt-2">Penerima beasiswa AI dari Dicoding Indonesia.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ────────────────── SKILLS ────────────────── -->
+<section id="skills" class="py-28">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="section-num mb-4" data-aos="fade-up">02 / SKILLS</div>
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-16" data-aos="fade-up" data-aos-delay="50">
+            Keahlian<br><span class="display" style="color:rgba(240,235,225,0.35)">Teknis & Soft</span>
+        </h2>
+
+        <div class="grid md:grid-cols-2 gap-16">
+            <!-- Hard Skills -->
+            <div data-aos="fade-right">
+                <div class="flex items-center gap-4 mb-8">
+                    <span class="mono text-xs tracking-widest uppercase" style="color:var(--crimson)">Hard Skills</span>
+                    <div class="flex-1 h-px bg-white/8"></div>
+                </div>
+                <div id="hard-skill-container" class="flex flex-wrap gap-3"></div>
+            </div>
+
+            <!-- Soft Skills -->
+            <div data-aos="fade-left" data-aos-delay="100">
+                <div class="flex items-center gap-4 mb-8">
+                    <span class="mono text-xs tracking-widest uppercase" style="color:var(--crimson)">Soft Skills</span>
+                    <div class="flex-1 h-px bg-white/8"></div>
+                </div>
+                <div id="soft-skill-container" class="flex flex-wrap gap-3"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ────────────────── PROJECTS ────────────────── -->
+<section id="projects" class="py-28">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="section-num mb-4" data-aos="fade-up">03 / PROJECTS</div>
+        <div class="flex flex-col md:flex-row justify-between items-end mb-14" data-aos="fade-up" data-aos-delay="50">
+            <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">
+                Karya<br><span class="display" style="color:rgba(240,235,225,0.35)">Terpilih</span>
+            </h2>
+            <p class="text-cream/40 mono text-xs tracking-widest mt-4 md:mt-0">PENGEMBANGAN WEB & MOBILE</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+            <div class="project-card rounded-2xl" data-aos="fade-up">
+                <img src="./img/warta.png" alt="WartaSwara" class="w-full h-96 object-cover">
+                <div class="project-info">
+                    <div class="project-num">PROJECT 01</div>
+                    <h3 class="text-2xl font-extrabold text-white tracking-tight">WartaSwara</h3>
+                    <p class="text-cream/50 text-sm mt-2 leading-relaxed">Portal berita komunitas berbasis PHP & MySQL.</p>
+                    <a href="https://wartaswara.xo.je" target="_blank" rel="noopener noreferrer" class="project-arrow">
+                        VIEW CASE STUDY <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="project-card rounded-2xl md:mt-10" data-aos="fade-up" data-aos-delay="100">
+                <img src="./img/kampuz.jpg" alt="KampuzHub" class="w-full h-96 object-cover">
+                <div class="project-info">
+                    <div class="project-num">PROJECT 02</div>
+                    <h3 class="text-2xl font-extrabold text-white tracking-tight">KampuzHub</h3>
+                    <p class="text-cream/50 text-sm mt-2 leading-relaxed">Sistem manajemen fasilitas kampus dengan Laravel.</p>
+                    <a href="#" class="project-arrow">
+                        VIEW CASE STUDY <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="project-card rounded-2xl md:mt-20" data-aos="fade-up" data-aos-delay="200">
+                <img src="./img/loka.jpg" alt="LokaKita" class="w-full h-96 object-cover">
+                <div class="project-info">
+                    <div class="project-num">PROJECT 03</div>
+                    <h3 class="text-2xl font-extrabold text-white tracking-tight">LokaKita</h3>
+                    <p class="text-cream/50 text-sm mt-2 leading-relaxed">Marketplace UMKM lokal menggunakan Flutter.</p>
+                    <a href="#" class="project-arrow">
+                        VIEW CASE STUDY <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ────────────────── JOKES / LOUNGE ────────────────── -->
+<section id="jokes" class="py-28" style="background:var(--ink)">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+        <div class="section-num mb-4" data-aos="fade-up">04 / LOUNGE</div>
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-16 display italic" data-aos="fade-up" data-aos-delay="50">
+            Programmer Jokes
+        </h2>
+
+        <div class="joke-box p-10 md:p-14 rounded-3xl min-h-[220px] flex flex-col justify-center mb-8" data-aos="zoom-in">
+            <p id="joke-content" class="text-xl md:text-2xl leading-relaxed text-cream/75 display italic transition-all duration-500">
+                Menarik lelucon pemrograman untuk Anda…
+            </p>
+        </div>
+
+        <button id="refreshJokeBtn" class="inline-flex items-center gap-4 border border-red-800 hover:border-red-600 text-cream/70 hover:text-cream px-8 py-4 transition-all duration-300 group" style="border-color:rgba(192,24,44,0.4);font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;">
+            <span>Ganti Lelucon</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+        </button>
+    </div>
+</section>
+
+<!-- ────────────────── CONTACT ────────────────── -->
+<section id="contact" class="py-28">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="section-num mb-4" data-aos="fade-up">05 / CONTACT</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-start">
+
+            <div data-aos="fade-right">
+                <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-none mb-8">
+                    Ayo<br>
+                    <span class="display italic" style="color:rgba(240,235,225,0.4)">Berdiskusi.</span>
+                </h2>
+                <p class="text-cream/45 text-sm leading-relaxed mb-10 max-w-sm" style="font-family:'DM Mono',monospace;line-height:1.9">
+                    Saya selalu terbuka untuk kolaborasi project pengembangan web yang menantang dan inovatif.
+                </p>
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-4 text-cream/50">
+                        <div class="w-10 h-10 flex items-center justify-center rounded-full" style="border:1px solid rgba(192,24,44,0.3)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--crimson)">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="mono text-sm">raflikhalifahrahman@gmail.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <div data-aos="fade-left" data-aos-delay="100">
+                <form id="contactForm" class="space-y-5">
+                    <div>
+                        <label for="nama">Nama Anda</label>
+                        <input type="text" id="nama" placeholder="John Doe" required class="input-field">
+                    </div>
+                    <div>
+                        <label for="email">Email Aktif</label>
+                        <input type="email" id="email" placeholder="john@email.com" required class="input-field">
+                    </div>
+                    <div>
+                        <label for="pesan">Pesan Project</label>
+                        <textarea id="pesan" rows="5" placeholder="Ceritakan tentang project Anda..." required class="input-field resize-none"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        Kirim Pesan
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ────────────────── FOOTER ────────────────── -->
+<footer class="py-10">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="text-xl font-extrabold tracking-tighter" style="font-family:'Syne',sans-serif">
+            RK<span style="color:var(--crimson)">R</span>.
+        </div>
+        <p class="mono text-xs tracking-widest text-cream/25 uppercase text-center">
+            &copy; 2026 Rafli Khalifah Rahman · Fans King Emyu Nomer Satu
+        </p>
+        <a href="#hero" class="mono text-xs tracking-widest text-cream/30 hover:text-cream/70 uppercase transition-colors">
+            Back to top ↑
+        </a>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
