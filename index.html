@@ -432,6 +432,383 @@
             flex-shrink: 0;
         }
         .marquee-item span { color: var(--crimson); }
+
+        /* ══════════════════════════════════════════
+           CODE QUIZ — STYLES
+        ══════════════════════════════════════════ */
+
+        /* Tombol trigger di section Lounge */
+        .quiz-trigger-wrap {
+            margin-top: 2.5rem;
+            display: flex;
+            justify-content: center;
+        }
+        #openQuizBtn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--cream);
+            border: 1px solid rgba(192,24,44,0.5);
+            padding: 14px 32px;
+            background: rgba(192,24,44,0.08);
+            cursor: none;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        #openQuizBtn:hover {
+            background: rgba(192,24,44,0.18);
+            border-color: var(--crimson);
+        }
+        #openQuizBtn .quiz-icon {
+            font-size: 1.1rem;
+        }
+
+        /* Modal overlay */
+        #quizModal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(5, 3, 2, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        #quizModal.quiz-hidden {
+            display: none;
+        }
+
+        /* Modal box */
+        .quiz-modal-box {
+            background: var(--ink-light);
+            border: 1px solid rgba(192,24,44,0.25);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 660px;
+            padding: 2rem;
+            position: relative;
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+        .quiz-modal-box::-webkit-scrollbar { width: 4px; }
+        .quiz-modal-box::-webkit-scrollbar-track { background: transparent; }
+        .quiz-modal-box::-webkit-scrollbar-thumb { background: rgba(192,24,44,0.3); border-radius: 4px; }
+
+        /* Close button */
+        #closeQuizModal {
+            position: absolute;
+            top: 1.1rem;
+            right: 1.1rem;
+            background: none;
+            border: 1px solid rgba(240,235,225,0.12);
+            color: rgba(240,235,225,0.5);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            cursor: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        #closeQuizModal:hover {
+            border-color: rgba(192,24,44,0.5);
+            color: var(--cream);
+        }
+
+        /* Quiz header */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .quiz-lang-wrap {
+            display: flex;
+            gap: 6px;
+        }
+        .quiz-lang-btn {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            padding: 6px 16px;
+            border: 1px solid rgba(240,235,225,0.12);
+            background: transparent;
+            color: rgba(240,235,225,0.4);
+            border-radius: 100px;
+            cursor: none;
+            transition: all 0.2s;
+        }
+        .quiz-lang-btn.active {
+            border-color: rgba(192,24,44,0.6);
+            background: rgba(192,24,44,0.12);
+            color: var(--cream);
+        }
+        .quiz-score-badge {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(240,235,225,0.5);
+            border: 1px solid rgba(240,235,225,0.1);
+            padding: 5px 14px;
+            border-radius: 100px;
+        }
+        .quiz-score-badge strong {
+            color: var(--crimson);
+        }
+
+        /* Timer */
+        .quiz-timer-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .quiz-timer-bar-bg {
+            flex: 1;
+            height: 4px;
+            background: rgba(240,235,225,0.07);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #quizTimerBar {
+            height: 100%;
+            background: var(--crimson);
+            border-radius: 4px;
+            transition: width 0.9s linear, background 0.3s;
+        }
+        #quizTimerBar.warn { background: #ff4444; }
+        #quizTimerCount {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(240,235,225,0.4);
+            min-width: 18px;
+            text-align: right;
+        }
+
+        /* Soal */
+        .quiz-qnum {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--crimson);
+            margin-bottom: 6px;
+        }
+        .quiz-qtext {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--cream);
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+        pre.quiz-code {
+            background: rgba(5, 3, 2, 0.6);
+            border: 1px solid rgba(192,24,44,0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.82rem;
+            color: rgba(240,235,225,0.85);
+            overflow-x: auto;
+            margin-bottom: 16px;
+            line-height: 1.7;
+            white-space: pre;
+        }
+
+        /* Pilihan jawaban */
+        .quiz-opts {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .quiz-opt-btn {
+            text-align: left;
+            padding: 11px 16px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.82rem;
+            border: 1px solid rgba(240,235,225,0.1);
+            border-radius: 10px;
+            background: rgba(240,235,225,0.03);
+            color: rgba(240,235,225,0.75);
+            cursor: none;
+            transition: all 0.15s;
+        }
+        .quiz-opt-btn:hover:not(:disabled) {
+            border-color: rgba(192,24,44,0.4);
+            background: rgba(192,24,44,0.08);
+            color: var(--cream);
+        }
+        .quiz-opt-btn.correct {
+            border-color: #2d7a3a !important;
+            background: rgba(45,122,58,0.15) !important;
+            color: #7ecf87 !important;
+        }
+        .quiz-opt-btn.wrong {
+            border-color: rgba(192,24,44,0.6) !important;
+            background: rgba(192,24,44,0.12) !important;
+            color: rgba(240,100,100,0.9) !important;
+        }
+        .quiz-opt-btn:disabled { cursor: not-allowed; }
+
+        /* Penjelasan */
+        .quiz-explain {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: rgba(192,24,44,0.06);
+            border-left: 3px solid var(--crimson);
+            border-radius: 0 10px 10px 0;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.78rem;
+            color: rgba(240,235,225,0.6);
+            line-height: 1.7;
+            display: none;
+        }
+        .quiz-explain.show { display: block; }
+
+        /* Footer soal */
+        .quiz-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 18px;
+        }
+        .quiz-prog-text {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: rgba(240,235,225,0.3);
+        }
+        #quizNextBtn {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 9px 20px;
+            border: 1px solid rgba(192,24,44,0.4);
+            background: rgba(192,24,44,0.08);
+            color: rgba(240,235,225,0.8);
+            border-radius: 8px;
+            cursor: none;
+            transition: all 0.2s;
+        }
+        #quizNextBtn:hover {
+            background: rgba(192,24,44,0.18);
+            border-color: var(--crimson);
+            color: var(--cream);
+        }
+
+        /* Leaderboard */
+        .quiz-lb-section {
+            margin-top: 22px;
+            border-top: 1px solid rgba(240,235,225,0.07);
+            padding-top: 18px;
+        }
+        .quiz-lb-title {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(240,235,225,0.3);
+            margin-bottom: 12px;
+        }
+        .quiz-lb-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(240,235,225,0.05);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.78rem;
+        }
+        .quiz-lb-row:last-child { border-bottom: none; }
+        .quiz-lb-rank {
+            color: rgba(240,235,225,0.25);
+            width: 18px;
+            flex-shrink: 0;
+        }
+        .quiz-lb-name {
+            flex: 1;
+            color: rgba(240,235,225,0.65);
+        }
+        .quiz-lb-lang {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border: 1px solid rgba(192,24,44,0.3);
+            border-radius: 100px;
+            color: var(--crimson);
+            flex-shrink: 0;
+        }
+        .quiz-lb-pts {
+            font-weight: 500;
+            color: var(--cream);
+        }
+        .quiz-lb-max {
+            font-size: 0.65rem;
+            color: rgba(240,235,225,0.3);
+        }
+        .quiz-lb-empty {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(240,235,225,0.25);
+            padding: 6px 0;
+        }
+
+        /* Hasil akhir */
+        .quiz-result {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .quiz-result-emoji { font-size: 3rem; margin-bottom: 10px; }
+        .quiz-result-score {
+            font-family: 'Syne', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--crimson);
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+        .quiz-result-msg {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.78rem;
+            color: rgba(240,235,225,0.45);
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+        .quiz-retry-btn {
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 12px 28px;
+            border: 1px solid rgba(192,24,44,0.5);
+            background: rgba(192,24,44,0.1);
+            color: var(--cream);
+            border-radius: 10px;
+            cursor: none;
+            transition: all 0.2s;
+        }
+        .quiz-retry-btn:hover {
+            background: rgba(192,24,44,0.22);
+            border-color: var(--crimson);
+        }
     </style>
 </head>
 
@@ -440,6 +817,52 @@
 <!-- Custom Cursor -->
 <div id="cursor-dot"></div>
 <div id="cursor-ring"></div>
+
+<!-- ════════════════ CODE QUIZ MODAL ════════════════ -->
+<div id="quizModal" class="quiz-hidden" role="dialog" aria-modal="true" aria-label="Code Quiz">
+    <div class="quiz-modal-box">
+        <button id="closeQuizModal" aria-label="Tutup quiz">✕</button>
+
+        <!-- Header: pilih bahasa & skor -->
+        <div class="quiz-header">
+            <div class="quiz-lang-wrap">
+                <button class="quiz-lang-btn active" id="quizBtnJS">JavaScript</button>
+                <button class="quiz-lang-btn" id="quizBtnPHP">PHP</button>
+            </div>
+            <div class="quiz-score-badge" id="quizScoreBadge">Skor: <strong>0</strong></div>
+        </div>
+
+        <!-- Timer bar -->
+        <div class="quiz-timer-wrap">
+            <div class="quiz-timer-bar-bg">
+                <div id="quizTimerBar" style="width:100%"></div>
+            </div>
+            <span id="quizTimerCount">15</span>
+        </div>
+
+        <!-- Body soal (di-render oleh JS) -->
+        <div id="quizBody">
+            <div class="quiz-qnum"  id="quizQNum"></div>
+            <div class="quiz-qtext" id="quizQText"></div>
+            <pre class="quiz-code"  id="quizQCode"></pre>
+            <div class="quiz-opts"  id="quizOpts"></div>
+            <div class="quiz-explain" id="quizExplain"></div>
+        </div>
+
+        <!-- Footer: progress & next -->
+        <div class="quiz-footer">
+            <span class="quiz-prog-text" id="quizProgText"></span>
+            <button id="quizNextBtn">Soal berikutnya →</button>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="quiz-lb-section">
+            <div class="quiz-lb-title">🏆 &nbsp;Leaderboard sesi ini</div>
+            <div id="quizLbList"></div>
+        </div>
+    </div>
+</div>
+<!-- ═══════════════════════════════════════════════════ -->
 
 <!-- ────────────────── HEADER ────────────────── -->
 <header class="sticky top-0 z-[100]">
@@ -467,7 +890,7 @@
     </div>
 </header>
 
-<!-- Mobile Menu — di luar header agar fixed inset-0 benar-benar full screen -->
+<!-- Mobile Menu -->
 <div id="mobile-menu" class="hidden fixed inset-0 flex-col items-center justify-center gap-10" style="z-index:9999;background:rgba(10,7,5,0.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);">
     <button id="menuClose" class="absolute top-6 right-6 text-cream p-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -485,7 +908,6 @@
 <section id="hero">
     <canvas id="canvas-bg"></canvas>
 
-    <!-- Grid lines decoration -->
     <div class="hero-grid-line v" style="left:20%"></div>
     <div class="hero-grid-line v" style="left:80%"></div>
     <div class="hero-grid-line h" style="top:30%"></div>
@@ -520,7 +942,6 @@
             </div>
         </div>
 
-        <!-- Live indicator -->
         <div class="mt-16 animate-fsu delay-3 flex items-center gap-3">
             <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block"></span>
             <span class="mono text-xs text-cream/30 tracking-widest">AVAILABLE FOR PROJECTS · 2026</span>
@@ -544,7 +965,6 @@
         <span class="marquee-item">PHP &amp; MySQL <span>·</span></span>
         <span class="marquee-item">Prompt Engineering <span>·</span></span>
         <span class="marquee-item">Frontend Dev <span>·</span></span>
-        <!-- Duplicate for seamless loop -->
         <span class="marquee-item">HTML5 <span>·</span></span>
         <span class="marquee-item">CSS3 <span>·</span></span>
         <span class="marquee-item">JavaScript <span>·</span></span>
@@ -610,7 +1030,6 @@
         </h2>
 
         <div class="grid md:grid-cols-2 gap-16">
-            <!-- Hard Skills -->
             <div data-aos="fade-right">
                 <div class="flex items-center gap-4 mb-8">
                     <span class="mono text-xs tracking-widest uppercase" style="color:var(--crimson)">Hard Skills</span>
@@ -619,7 +1038,6 @@
                 <div id="hard-skill-container" class="flex flex-wrap gap-3"></div>
             </div>
 
-            <!-- Soft Skills -->
             <div data-aos="fade-left" data-aos-delay="100">
                 <div class="flex items-center gap-4 mb-8">
                     <span class="mono text-xs tracking-widest uppercase" style="color:var(--crimson)">Soft Skills</span>
@@ -643,7 +1061,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-
             <div class="project-card rounded-2xl" data-aos="fade-up">
                 <img src="./img/warta.png" alt="WartaSwara" class="w-full h-96 object-cover">
                 <div class="project-info">
@@ -662,9 +1079,7 @@
                     <div class="project-num">PROJECT 02</div>
                     <h3 class="text-2xl font-extrabold text-white tracking-tight">KampuzHub</h3>
                     <p class="text-cream/50 text-sm mt-2 leading-relaxed">Sistem manajemen fasilitas kampus dengan Laravel.</p>
-                    <a href="#" class="project-arrow">
-                        VIEW CASE STUDY <span>→</span>
-                    </a>
+                    <a href="#" class="project-arrow">VIEW CASE STUDY <span>→</span></a>
                 </div>
             </div>
 
@@ -674,12 +1089,9 @@
                     <div class="project-num">PROJECT 03</div>
                     <h3 class="text-2xl font-extrabold text-white tracking-tight">LokaKita</h3>
                     <p class="text-cream/50 text-sm mt-2 leading-relaxed">Marketplace UMKM lokal menggunakan Flutter.</p>
-                    <a href="#" class="project-arrow">
-                        VIEW CASE STUDY <span>→</span>
-                    </a>
+                    <a href="#" class="project-arrow">VIEW CASE STUDY <span>→</span></a>
                 </div>
             </div>
-
         </div>
     </div>
 </section>
@@ -698,12 +1110,20 @@
             </p>
         </div>
 
-        <button id="refreshJokeBtn" class="inline-flex items-center gap-4 border border-red-800 hover:border-red-600 text-cream/70 hover:text-cream px-8 py-4 transition-all duration-300 group" style="border-color:rgba(192,24,44,0.4);font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;">
-            <span>Ganti Lelucon</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-        </button>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4" data-aos="fade-up" data-aos-delay="100">
+            <button id="refreshJokeBtn" class="inline-flex items-center gap-4 border border-red-800 hover:border-red-600 text-cream/70 hover:text-cream px-8 py-4 transition-all duration-300 group" style="border-color:rgba(192,24,44,0.4);font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;">
+                <span>Ganti Lelucon</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:rotate-180 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+
+            <!-- ⚡ TOMBOL BUKA CODE QUIZ -->
+            <button id="openQuizBtn" data-aos="fade-up" data-aos-delay="150">
+                <span class="quiz-icon">⚡</span>
+                <span>Code Quiz</span>
+            </button>
+        </div>
     </div>
 </section>
 
@@ -778,5 +1198,7 @@
 <!-- Scripts -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="script.js"></script>
+<script src="quiz.js"></script>
+
 </body>
 </html>
