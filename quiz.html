@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <title>Code Quiz — RKR Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --crimson: #c0182c;
+            --crimson-dim: #7a0f1c;
+            --crimson-glow: rgba(192,24,44,0.15);
+            --cream: #f0ebe1;
+            --ink: #0a0705;
+            --ink-light: #1a1210;
+            --muted: #6b5f58;
+            --green: #22c55e;
+            --red: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { cursor: none; }
+        body { font-family: 'Syne', sans-serif; background: var(--ink); color: var(--cream); min-height: 100vh; overflow-x: hidden; }
+
+        /* CURSOR */
+        #cursor-dot { position: fixed; top: 0; left: 0; width: 8px; height: 8px; background: var(--crimson); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); }
+        #cursor-ring { position: fixed; top: 0; left: 0; width: 36px; height: 36px; border: 1.5px solid rgba(192,24,44,0.45); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: width .2s, height .2s; }
+
+        /* NOISE */
+        body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); opacity: 0.03; pointer-events: none; z-index: 9990; }
+
+        .mono { font-family: 'DM Mono', monospace; }
+        .serif-it { font-family: 'Instrument Serif', serif; font-style: italic; }
+
+        /* HEADER */
+        header { background: rgba(10,7,5,0.82); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(192,24,44,0.12); position: sticky; top: 0; z-index: 100; }
+
+        /* SCREENS */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* CATEGORY BTN */
+        .cat-btn { position: relative; background: rgba(240,235,225,0.03); border: 1px solid rgba(240,235,225,0.08); border-radius: 16px; padding: 24px 16px; text-align: center; cursor: none; transition: all 0.3s; overflow: hidden; }
+        .cat-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--crimson-glow), transparent); opacity: 0; transition: opacity 0.3s; }
+        .cat-btn:hover { border-color: rgba(192,24,44,0.5); transform: translateY(-3px); }
+        .cat-btn:hover::before { opacity: 1; }
+        .cat-btn.selected { border-color: var(--crimson); background: rgba(192,24,44,0.1); }
+        .cat-btn.selected::before { opacity: 1; }
+
+        /* PILL BTN */
+        .pill-btn { padding: 10px 22px; border-radius: 100px; border: 1px solid rgba(240,235,225,0.12); background: transparent; color: rgba(240,235,225,0.45); font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; cursor: none; transition: all 0.25s; }
+        .pill-btn:hover { border-color: rgba(192,24,44,0.4); color: var(--cream); }
+        .pill-btn.selected { background: var(--crimson); border-color: var(--crimson); color: white; }
+
+        /* START BTN */
+        .btn-primary { background: var(--crimson); color: white; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 17px 44px; border: none; border-radius: 12px; cursor: none; transition: all 0.25s; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-primary:hover { background: #e01f35; transform: translateY(-2px); }
+        .btn-primary:disabled { opacity: 0.3; transform: none; }
+
+        /* TIMER RING */
+        .timer-wrap { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
+        .timer-wrap svg { transform: rotate(-90deg); }
+        .t-bg { fill: none; stroke: rgba(240,235,225,0.07); stroke-width: 4; }
+        .t-fill { fill: none; stroke: var(--crimson); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 220; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+        .timer-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 1.05rem; }
+
+        /* PROGRESS BAR */
+        .prog-wrap { height: 3px; background: rgba(240,235,225,0.06); border-radius: 100px; overflow: hidden; }
+        .prog-fill { height: 100%; background: var(--crimson); border-radius: 100px; transition: width 0.5s ease; }
+
+        /* QUESTION CARD */
+        .q-card { background: var(--ink-light); border: 1px solid rgba(240,235,225,0.07); border-radius: 20px; padding: 32px; }
+
+        /* CODE BLOCK */
+        .code-block { background: #0c0a08; border: 1px solid rgba(240,235,225,0.07); border-radius: 12px; padding: 18px 22px; font-family: 'DM Mono', monospace; font-size: 0.8rem; line-height: 1.75; color: #c9b99a; overflow-x: auto; margin: 18px 0; position: relative; }
+        .lang-tag { position: absolute; top: 10px; right: 14px; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.15em; color: rgba(240,235,225,0.2); text-transform: uppercase; }
+
+        /* OPTIONS */
+        .opt-btn { width: 100%; text-align: left; background: rgba(240,235,225,0.03); border: 1px solid rgba(240,235,225,0.08); border-radius: 12px; padding: 15px 18px; color: rgba(240,235,225,0.72); font-family: 'DM Mono', monospace; font-size: 0.8rem; cursor: none; transition: all 0.2s; display: flex; align-items: center; gap: 14px; }
+        .opt-btn:hover:not(:disabled) { border-color: rgba(192,24,44,0.45); background: rgba(192,24,44,0.06); color: var(--cream); }
+        .opt-label { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(240,235,225,0.15); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; flex-shrink: 0; transition: all 0.2s; }
+        .opt-btn:hover:not(:disabled) .opt-label { border-color: var(--crimson); background: rgba(192,24,44,0.15); color: var(--crimson); }
+        .opt-btn.correct { border-color: var(--green) !important; background: rgba(34,197,94,0.08) !important; color: #86efac !important; }
+        .opt-btn.correct .opt-label { border-color: var(--green); background: rgba(34,197,94,0.18); color: var(--green); }
+        .opt-btn.wrong { border-color: var(--red) !important; background: rgba(239,68,68,0.08) !important; color: #fca5a5 !important; }
+        .opt-btn.wrong .opt-label { border-color: var(--red); background: rgba(239,68,68,0.18); color: var(--red); }
+        .opt-btn:disabled { cursor: not-allowed; }
+
+        /* FEEDBACK FLASH */
+        .flash { position: fixed; inset: 0; pointer-events: none; z-index: 500; opacity: 0; transition: opacity 0.15s; }
+        .flash.c { background: rgba(34,197,94,0.07); }
+        .flash.w { background: rgba(239,68,68,0.07); }
+        .flash.show { opacity: 1; }
+
+        /* EXPLANATION */
+        .exp-box { background: rgba(192,24,44,0.05); border: 1px solid rgba(192,24,44,0.18); border-radius: 12px; padding: 15px 18px; font-family: 'DM Mono', monospace; font-size: 0.77rem; color: rgba(240,235,225,0.58); line-height: 1.75; margin-top: 14px; display: none; }
+        .exp-box.show { display: block; }
+        .exp-box strong { color: var(--crimson); }
+
+        /* NEXT BTN */
+        .btn-next { background: transparent; border: 1px solid rgba(192,24,44,0.4); color: var(--crimson); font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 13px 26px; border-radius: 10px; cursor: none; transition: all 0.25s; display: none; align-items: center; gap: 8px; }
+        .btn-next:hover { background: var(--crimson); color: white; border-color: var(--crimson); }
+        .btn-next.show { display: inline-flex; }
+
+        /* RESULT RING */
+        .res-ring-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto; }
+        .res-ring-wrap svg { transform: rotate(-90deg); }
+        .r-bg { fill: none; stroke: rgba(240,235,225,0.06); stroke-width: 8; }
+        .r-fill { fill: none; stroke: var(--crimson); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 440; stroke-dashoffset: 440; transition: stroke-dashoffset 1.5s cubic-bezier(0.22,1,0.36,1); }
+        .res-score-abs { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        /* LEADERBOARD */
+        .lb-row { display: flex; align-items: center; gap: 14px; padding: 13px 18px; border-radius: 12px; background: rgba(240,235,225,0.02); border: 1px solid rgba(240,235,225,0.05); }
+        .lb-row.me { border-color: rgba(192,24,44,0.35); background: rgba(192,24,44,0.06); }
+        .lb-rank { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 0.68rem; font-weight: 600; flex-shrink: 0; }
+        .lb-rank.gold   { background: rgba(251,191,36,0.18); color: #fbbf24; border: 1px solid rgba(251,191,36,0.28); }
+        .lb-rank.silver { background: rgba(156,163,175,0.18); color: #9ca3af; border: 1px solid rgba(156,163,175,0.28); }
+        .lb-rank.bronze { background: rgba(180,83,9,0.18);   color: #b45309; border: 1px solid rgba(180,83,9,0.28); }
+        .lb-rank.other  { background: rgba(240,235,225,0.05); color: rgba(240,235,225,0.3); border: 1px solid rgba(240,235,225,0.08); }
+
+        /* GRADE TAG */
+        .grade-tag { display: inline-block; padding: 5px 18px; border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 0.1em; }
+        .grade-tag.S { background: rgba(192,24,44,0.18); color: #f87171; border: 1px solid rgba(192,24,44,0.28); }
+        .grade-tag.A { background: rgba(251,191,36,0.13); color: #fbbf24; border: 1px solid rgba(251,191,36,0.23); }
+        .grade-tag.B { background: rgba(34,197,94,0.1);  color: #86efac; border: 1px solid rgba(34,197,94,0.18); }
+        .grade-tag.C { background: rgba(156,163,175,0.1); color: #9ca3af; border: 1px solid rgba(156,163,175,0.15); }
+
+        /* ANIMATIONS */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+        .fade-up { animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+        .d1 { animation-delay: 0.1s; }
+        .d2 { animation-delay: 0.2s; }
+        .d3 { animation-delay: 0.3s; }
+        .d4 { animation-delay: 0.4s; }
+
+        @keyframes popIn { 0%{transform:scale(0.8);opacity:0;} 70%{transform:scale(1.04);} 100%{transform:scale(1);opacity:1;} }
+        .pop-in { animation: popIn 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+
+        @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
+        .shake { animation: shake 0.4s ease; }
+
+        /* STAT CARD */
+        .stat-card { padding: 20px; border-radius: 16px; background: rgba(240,235,225,0.03); border: 1px solid rgba(240,235,225,0.07); text-align: center; }
+    </style>
+</head>
+<body>
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+<div id="flash" class="flash"></div>
+
+<!-- HEADER -->
+<header>
+    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-3 group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--crimson)"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            <span class="mono text-xs tracking-widest uppercase" style="color:rgba(240,235,225,0.4)">Portfolio</span>
+        </a>
+        <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold" style="font-family:'Syne',sans-serif;letter-spacing:-0.04em">RK<span style="color:var(--crimson)">R</span>.</span>
+            <span class="mono text-xs px-2 py-1 rounded" style="color:var(--crimson);background:rgba(192,24,44,0.1);border:1px solid rgba(192,24,44,0.2)">QUIZ</span>
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════════ SCREEN: START ═══════════════════ -->
+<div id="screen-start" class="screen active">
+    <div class="max-w-3xl mx-auto px-6 py-16">
+
+        <div class="text-center mb-14 fade-up">
+            <p class="mono text-xs tracking-widest uppercase mb-4" style="color:var(--crimson)">Dev Challenge</p>
+            <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-4" style="letter-spacing:-0.03em">Code <span class="serif-it" style="color:rgba(240,235,225,0.3)">Quiz</span></h1>
+            <p class="mono text-sm leading-relaxed" style="color:rgba(240,235,225,0.38)">Uji kemampuan coding-mu! Pilih kategori & tingkat kesulitan.</p>
+        </div>
+
+        <!-- Kategori -->
+        <div class="mb-10 fade-up d1">
+            <p class="mono text-xs tracking-widest uppercase mb-5" style="color:rgba(240,235,225,0.3)">01 — Kategori</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="cat-grid">
+                <button class="cat-btn selected" data-cat="all"><span style="font-size:1.9rem;display:block;margin-bottom:8px">🎯</span><p class="font-bold text-sm">Semua</p><p class="mono text-xs mt-1" style="color:rgba(240,235,225,0.3)">Mix</p></button>
+                <button class="cat-btn" data-cat="js"><span style="font-size:1.9rem;display:block;margin-bottom:8px">⚡</span><p class="font-bold text-sm">JavaScript</p><p class="mono text-xs mt-1" style="color:rgba(240,235,225,0.3)">ES6+</p></button>
+                <button class="cat-btn" data-cat="php"><span style="font-size:1.9rem;display:block;margin-bottom:8px">🐘</span><p class="font-bold text-sm">PHP</p><p class="mono text-xs mt-1" style="color:rgba(240,235,225,0.3)">& Laravel</p></button>
+                <button class="cat-btn" data-cat="html"><span style="font-size:1.9rem;display:block;margin-bottom:8px">🎨</span><p class="font-bold text-sm">HTML/CSS</p><p class="mono text-xs mt-1" style="color:rgba(240,235,225,0.3)">Frontend</p></button>
+            </div>
+        </div>
+
+        <!-- Kesulitan -->
+        <div class="mb-10 fade-up d2">
+            <p class="mono text-xs tracking-widest uppercase mb-5" style="color:rgba(240,235,225,0.3)">02 — Kesulitan</p>
+            <div class="flex gap-3 flex-wrap" id="diff-grid">
+                <button class="pill-btn selected" data-diff="easy">Easy</button>
+                <button class="pill-btn" data-diff="medium">Medium</button>
+                <button class="pill-btn" data-diff="hard">Hard</button>
+                <button class="pill-btn" data-diff="all">All Levels</button>
+            </div>
+        </div>
+
+        <!-- Jumlah soal -->
+        <div class="mb-14 fade-up d3">
+            <p class="mono text-xs tracking-widest uppercase mb-5" style="color:rgba(240,235,225,0.3)">03 — Jumlah Soal</p>
+            <div class="flex gap-3 flex-wrap" id="count-grid">
+                <button class="pill-btn selected" data-count="5">5 Soal</button>
+                <button class="pill-btn" data-count="10">10 Soal</button>
+                <button class="pill-btn" data-count="15">15 Soal</button>
+            </div>
+        </div>
+
+        <div class="text-center fade-up d4">
+            <button id="btn-start" class="btn-primary">
+                Mulai Quiz
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════ SCREEN: QUIZ ═══════════════════ -->
+<div id="screen-quiz" class="screen">
+    <div class="max-w-3xl mx-auto px-6 py-10">
+
+        <!-- Top bar -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex-1 mr-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="mono text-xs" style="color:rgba(240,235,225,0.35)">Soal <span id="q-cur">1</span>/<span id="q-tot">10</span></span>
+                    <span class="mono text-xs" style="color:var(--crimson)" id="score-live">Skor: 0</span>
+                </div>
+                <div class="prog-wrap"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+            </div>
+            <div class="timer-wrap">
+                <svg width="76" height="76" viewBox="0 0 76 76">
+                    <circle class="t-bg" cx="38" cy="38" r="33"/>
+                    <circle class="t-fill" id="t-ring" cx="38" cy="38" r="33"/>
+                </svg>
+                <div class="timer-num" id="t-num">20</div>
+            </div>
+        </div>
+
+        <!-- Card -->
+        <div class="q-card mb-6" id="q-card">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="mono text-xs px-3 py-1 rounded-full" id="q-cat-tag" style="background:rgba(192,24,44,0.1);border:1px solid rgba(192,24,44,0.2);color:var(--crimson)">JS</span>
+                <span class="mono text-xs px-3 py-1 rounded-full" id="q-diff-tag" style="background:rgba(240,235,225,0.05);border:1px solid rgba(240,235,225,0.08);color:rgba(240,235,225,0.4)">Easy</span>
+            </div>
+            <h2 class="text-lg font-bold leading-snug" id="q-text" style="letter-spacing:-0.01em">Loading...</h2>
+            <div class="code-block" id="q-code" style="display:none">
+                <span class="lang-tag" id="q-lang"></span>
+                <pre id="q-pre" style="white-space:pre-wrap;font-size:0.8rem"></pre>
+            </div>
+            <div class="grid gap-3 mt-6" id="opts"></div>
+            <div class="exp-box" id="exp-box"><strong>💡 Penjelasan:</strong> <span id="exp-text"></span></div>
+        </div>
+
+        <div class="flex justify-end">
+            <button class="btn-next" id="btn-next">Soal Berikutnya <span>→</span></button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════ SCREEN: RESULT ═══════════════════ -->
+<div id="screen-result" class="screen">
+    <div class="max-w-3xl mx-auto px-6 py-16">
+        <div class="text-center mb-12">
+            <div class="res-ring-wrap mb-6">
+                <svg width="160" height="160" viewBox="0 0 160 160">
+                    <circle class="r-bg" cx="80" cy="80" r="70"/>
+                    <circle class="r-fill" id="r-ring" cx="80" cy="80" r="70"/>
+                </svg>
+                <div class="res-score-abs">
+                    <span class="text-4xl font-extrabold" id="r-score" style="letter-spacing:-0.04em">0</span>
+                    <span class="mono text-xs mt-1" style="color:rgba(240,235,225,0.35)">/ <span id="r-total">10</span></span>
+                </div>
+            </div>
+            <div id="r-grade" class="grade-tag A mb-4">A</div>
+            <h2 class="text-4xl font-extrabold tracking-tight mb-2" id="r-title" style="letter-spacing:-0.02em">Luar Biasa!</h2>
+            <p class="mono text-sm" id="r-sub" style="color:rgba(240,235,225,0.4)">Memuat hasil...</p>
+
+            <div class="grid grid-cols-3 gap-4 mt-8 mb-10">
+                <div class="stat-card"><div class="text-2xl font-extrabold mb-1" id="s-cor" style="color:var(--green)">0</div><div class="mono text-xs" style="color:rgba(240,235,225,0.35)">Benar</div></div>
+                <div class="stat-card"><div class="text-2xl font-extrabold mb-1" id="s-wrg" style="color:var(--red)">0</div><div class="mono text-xs" style="color:rgba(240,235,225,0.35)">Salah</div></div>
+                <div class="stat-card"><div class="text-2xl font-extrabold mb-1" id="s-pct" style="color:var(--crimson)">0%</div><div class="mono text-xs" style="color:rgba(240,235,225,0.35)">Akurasi</div></div>
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="mb-10">
+            <div class="flex items-center gap-4 mb-5">
+                <span class="mono text-xs tracking-widest uppercase" style="color:var(--crimson)">Riwayat Skor</span>
+                <div class="flex-1 h-px" style="background:rgba(240,235,225,0.06)"></div>
+                <button id="btn-clear-lb" class="mono text-xs" style="color:rgba(240,235,225,0.25);cursor:none;transition:color 0.2s" onmouseover="this.style.color='var(--crimson)'" onmouseout="this.style.color='rgba(240,235,225,0.25)'">Hapus</button>
+            </div>
+            <div id="lb-list" class="flex flex-col gap-3"></div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button id="btn-retry" class="btn-primary flex-1 justify-center">
+                Coba Lagi
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+            <a href="index.html" class="btn-primary flex-1 justify-center" style="background:transparent;border:1px solid rgba(192,24,44,0.35);color:var(--crimson)">
+                ← Portfolio
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── CURSOR ───
+const dot=document.getElementById('cursor-dot'), ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function loop(){dot.style.left=mx+'px';dot.style.top=my+'px';rx+=(mx-rx)*.14;ry+=(my-ry)*.14;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+
+// ─── QUESTION BANK ───
+const QB=[
+    // JAVASCRIPT - EASY
+    {cat:'js',diff:'easy',q:'Apa output dari kode berikut?',code:'console.log(typeof null);',lang:'JavaScript',opts:['"null"','"object"','"undefined"','"boolean"'],ans:1,exp:'typeof null mengembalikan "object" — ini adalah bug legendaris JavaScript yang sengaja dipertahankan untuk kompatibilitas mundur.'},
+    {cat:'js',diff:'easy',q:'Cara yang benar mendeklarasikan konstanta di JavaScript modern?',code:null,lang:'JavaScript',opts:['var PI = 3.14','let PI = 3.14','const PI = 3.14','constant PI = 3.14'],ans:2,exp:'const mendeklarasikan konstanta yang tidak bisa di-reassign. var dan let bisa diubah nilainya kapan saja.'},
+    {cat:'js',diff:'easy',q:'Apa output dari kode berikut?',code:'console.log(1 + "2" + 3);',lang:'JavaScript',opts:['"6"','"123"','6','Error'],ans:1,exp:'Type coercion: 1 + "2" = "12" (string), lalu "12" + 3 = "123". JavaScript memproses dari kiri ke kanan.'},
+    {cat:'js',diff:'easy',q:'Method array manakah yang menambahkan elemen ke AKHIR array?',code:null,lang:'JavaScript',opts:['unshift()','push()','splice()','concat()'],ans:1,exp:'push() menambahkan satu atau lebih elemen ke akhir array dan mengembalikan panjang array baru. unshift() menambahkan ke awal.'},
+    // JAVASCRIPT - MEDIUM
+    {cat:'js',diff:'medium',q:'Apa yang akan dicetak ke console?',code:'const arr = [1, 2, 3];\nconst [a, , b] = arr;\nconsole.log(a, b);',lang:'JavaScript',opts:['1 2','1 3','2 3','undefined undefined'],ans:1,exp:'Array destructuring dengan skip element menggunakan koma kosong. [a,,b] mengambil index 0 → a, skip index 1, index 2 → b.'},
+    {cat:'js',diff:'medium',q:'Apa output dari kode berikut?',code:'console.log([] == ![]);',lang:'JavaScript',opts:['true','false','TypeError','undefined'],ans:0,exp:'![] = false. [] == false: array kosong dikonversi ke 0, false ke 0. 0==0 adalah true. Ini salah satu quirk JavaScript yang paling terkenal!'},
+    {cat:'js',diff:'medium',q:'Fungsi manakah yang MUTATE (mengubah) array aslinya?',code:null,lang:'JavaScript',opts:['map()','filter()','splice()','slice()'],ans:2,exp:'splice() mengubah array asli (mutating). map(), filter(), dan slice() mengembalikan array baru tanpa mengubah yang asli.'},
+    {cat:'js',diff:'medium',q:'Apa output dari kode ini?',code:'console.log(0.1 + 0.2 === 0.3);',lang:'JavaScript',opts:['true','false','NaN','Error'],ans:1,exp:'Floating point precision issue! 0.1 + 0.2 = 0.30000000000000004 di JavaScript. Gunakan Number.EPSILON untuk perbandingan float.'},
+    // JAVASCRIPT - HARD
+    {cat:'js',diff:'hard',q:'Apa output dari kode berikut?',code:'function outer() {\n  let count = 0;\n  return function() {\n    return ++count;\n  }\n}\nconst fn = outer();\nconsole.log(fn(), fn(), fn());',lang:'JavaScript',opts:['0 0 0','1 1 1','1 2 3','undefined'],ans:2,exp:'Closure! Fungsi inner mempertahankan referensi ke variabel count di scope outer(). Setiap fn() menaikkan count yang sama, menghasilkan 1 2 3.'},
+    {cat:'js',diff:'hard',q:'Apa hasil dari Promise.all() berikut?',code:"Promise.all([\n  Promise.resolve(1),\n  Promise.reject('error'),\n  Promise.resolve(3)\n]).then(v => console.log(v))\n  .catch(e => console.log(e));",lang:'JavaScript',opts:['[1, undefined, 3]','[1, 3]','"error"','[1, "error", 3]'],ans:2,exp:'Promise.all() langsung reject jika satu promise reject. Gunakan Promise.allSettled() untuk menunggu semua selesai tanpa short-circuit.'},
+    // PHP - EASY
+    {cat:'php',diff:'easy',q:'Manakah cara BENAR untuk output di PHP?',code:null,lang:'PHP',opts:['console.log("Hello")','print("Hello")','echo "Hello"','B dan C benar'],ans:3,exp:'Baik print() maupun echo valid di PHP. print() mengembalikan nilai 1. console.log() hanya ada di JavaScript.'},
+    {cat:'php',diff:'easy',q:'Apa perbedaan == dan === di PHP?',code:'var_dump(0 == "a");  // PHP 7\nvar_dump(0 === "a");',lang:'PHP',opts:['true / true','true / false','false / false','false / true'],ans:1,exp:'== membandingkan nilai dengan type coercion (0=="a" true di PHP 7 karena "a"→0). === membandingkan nilai DAN tipe data secara ketat.'},
+    {cat:'php',diff:'easy',q:'Simbol apa yang digunakan untuk variabel di PHP?',code:null,lang:'PHP',opts:['@nama','#nama','$nama','&nama'],ans:2,exp:'Variabel di PHP selalu diawali tanda dollar ($). Contoh: $nama = "Rafli";. Ini berbeda dari kebanyakan bahasa lain.'},
+    // PHP - MEDIUM
+    {cat:'php',diff:'medium',q:'Apa output dari kode PHP berikut?',code:'$arr = [3, 1, 4, 1, 5, 9];\n$result = array_filter($arr, fn($n) => $n > 3);\necho count($result);',lang:'PHP',opts:['2','3','4','6'],ans:1,exp:'array_filter() menyaring nilai > 3. Hasilnya: [4, 5, 9] — ada 3 elemen.'},
+    {cat:'php',diff:'medium',q:'Di Laravel, method Eloquent mana yang mengembalikan satu record ATAU throw exception jika tidak ada?',code:null,lang:'PHP/Laravel',opts:['find()','first()','findOrFail()','get()'],ans:2,exp:'findOrFail() melempar ModelNotFoundException jika tidak ditemukan. find() dan first() mengembalikan null. get() mengembalikan Collection.'},
+    // PHP - HARD
+    {cat:'php',diff:'hard',q:'Apa output dari kode PHP berikut?',code:'$a = 5;\nfunction test() {\n  echo $a;\n}\ntest();',lang:'PHP',opts:['5','null','Notice: Undefined variable','0'],ans:2,exp:'PHP tidak memiliki closure scope otomatis. Variabel luar tidak bisa diakses di dalam fungsi tanpa keyword global $a atau passing sebagai parameter.'},
+    {cat:'php',diff:'hard',q:'Keyword apa yang digunakan untuk memakai trait di dalam class PHP?',code:'trait Greet {\n  public function hello() { return "Hi!"; }\n}\nclass MyClass {\n  ??? Greet;\n}',lang:'PHP',opts:['extends','implements','use','include'],ans:2,exp:'Trait digunakan dengan keyword use di dalam body class. Trait adalah mekanisme code reuse horizontal, berbeda dari inheritance (extends) dan interface (implements).'},
+    // HTML/CSS - EASY
+    {cat:'html',diff:'easy',q:'Tag HTML semantik yang benar untuk navigasi utama website?',code:null,lang:'HTML',opts:['<div class="nav">','<navigation>','<nav>','<menu>'],ans:2,exp:'<nav> adalah elemen HTML5 semantik untuk navigasi. Membantu accessibility, SEO, dan keterbacaan kode dibanding <div>.'},
+    {cat:'html',diff:'easy',q:'Property CSS untuk mengatur jarak DI DALAM border elemen?',code:null,lang:'CSS',opts:['margin','padding','border-spacing','gap'],ans:1,exp:'padding = ruang antara konten dan border (ke dalam). margin = ruang di luar border (antar elemen). gap = untuk flexbox/grid.'},
+    {cat:'html',diff:'easy',q:'Atribut HTML yang wajib ada di tag <img> untuk aksesibilitas?',code:null,lang:'HTML',opts:['src','href','alt','title'],ans:2,exp:'alt (alternative text) wajib ada untuk aksesibilitas — dibaca oleh screen reader dan ditampilkan saat gambar gagal load. Juga penting untuk SEO.'},
+    // HTML/CSS - MEDIUM
+    {cat:'html',diff:'medium',q:'Apa yang dilakukan position: sticky pada CSS?',code:null,lang:'CSS',opts:['Fixed di viewport selamanya','Ikut scroll lalu menempel saat threshold tercapai','Dikeluarkan dari document flow','Menempel ke parent relative'],ans:1,exp:'position: sticky adalah hybrid relative + fixed. Elemen ikut scroll normal, lalu "sticky" di posisi tertentu (misal top:0) saat scroll melewati threshold.'},
+    {cat:'html',diff:'medium',q:'Selector CSS dengan specificity TERTINGGI dari pilihan berikut?',code:null,lang:'CSS',opts:['div p','.container .item','#header','div#header.active'],ans:3,exp:'Specificity: ID(#)=100, Class(.)=10, Element=1. div#header.active = 1+100+10 = 111. #header = 100. .container .item = 20. div p = 2.'},
+    // HTML/CSS - HARD
+    {cat:'html',diff:'hard',q:'Warna teks yang ditampilkan dari CSS berikut?',code:'<style>\n  .box { color: blue; }\n  #box { color: green; }\n  .box { color: red !important; }\n  div  { color: yellow; }\n</style>\n<div id="box" class="box">Teks</div>',lang:'HTML/CSS',opts:['blue','green','red','yellow'],ans:2,exp:'!important selalu menang atas specificity biasa. Meski #box lebih spesifik dari .box, deklarasi !important di .box menang. Hindari !important — gunakan specificity yang tepat.'},
+    {cat:'html',diff:'hard',q:'Untuk gambar dekoratif (tidak informatif), atribut alt yang benar?',code:'<img src="deco.png" ??? >',lang:'HTML',opts:['alt="Gambar dekoratif"','alt=""','aria-hidden="false"','role="image"'],ans:1,exp:'alt="" (kosong) memberitahu screen reader untuk skip gambar dekoratif. alt="Gambar dekoratif" malah mengganggu pengguna screen reader dengan info yang tidak berguna.'},
+];
+
+// ─── STATE ───
+let S = { cat:'all', diff:'easy', count:5, qs:[], cur:0, score:0, answered:false, tv:0, ti:null };
+
+// ─── UTILS ───
+function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+function shuffle(a){return a.sort(()=>Math.random()-0.5);}
+
+// ─── START SCREEN ───
+document.getElementById('cat-grid').addEventListener('click',e=>{
+    const b=e.target.closest('.cat-btn'); if(!b) return;
+    document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected'); S.cat=b.dataset.cat;
+});
+document.getElementById('diff-grid').addEventListener('click',e=>{
+    const b=e.target.closest('.pill-btn'); if(!b) return;
+    document.querySelectorAll('#diff-grid .pill-btn').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected'); S.diff=b.dataset.diff;
+});
+document.getElementById('count-grid').addEventListener('click',e=>{
+    const b=e.target.closest('.pill-btn'); if(!b) return;
+    document.querySelectorAll('#count-grid .pill-btn').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected'); S.count=parseInt(b.dataset.count);
+});
+
+document.getElementById('btn-start').addEventListener('click',()=>{
+    let pool=QB.filter(q=>{
+        const cOk=S.cat==='all'||q.cat===S.cat;
+        const dOk=S.diff==='all'||q.diff===S.diff;
+        return cOk&&dOk;
+    });
+    if(pool.length===0){alert('Tidak ada soal untuk kombinasi ini. Coba pilihan lain!');return;}
+    S.qs=shuffle(pool).slice(0,S.count);
+    S.cur=0; S.score=0; S.answered=false;
+    showScreen('screen-quiz');
+    renderQ();
+});
+
+// ─── RENDER QUESTION ───
+function renderQ(){
+    const q=S.qs[S.cur], total=S.qs.length;
+    document.getElementById('q-cur').textContent=S.cur+1;
+    document.getElementById('q-tot').textContent=total;
+    document.getElementById('score-live').textContent='Skor: '+S.score;
+    document.getElementById('prog-bar').style.width=`${(S.cur/total)*100}%`;
+
+    const catMap={js:'JavaScript',php:'PHP/Laravel',html:'HTML/CSS'};
+    document.getElementById('q-cat-tag').textContent=catMap[q.cat]||q.cat;
+    document.getElementById('q-diff-tag').textContent=q.diff.charAt(0).toUpperCase()+q.diff.slice(1);
+    document.getElementById('q-text').textContent=q.q;
+
+    const cb=document.getElementById('q-code');
+    if(q.code){cb.style.display='block';document.getElementById('q-lang').textContent=q.lang;document.getElementById('q-pre').textContent=q.code;}
+    else{cb.style.display='none';}
+
+    const labels=['A','B','C','D'];
+    document.getElementById('opts').innerHTML=q.opts.map((o,i)=>`
+        <button class="opt-btn" data-i="${i}">
+            <span class="opt-label">${labels[i]}</span>
+            <span>${o}</span>
+        </button>`).join('');
+    document.querySelectorAll('.opt-btn').forEach(b=>b.addEventListener('click',()=>answer(parseInt(b.dataset.i))));
+
+    document.getElementById('exp-box').classList.remove('show');
+    const nb=document.getElementById('btn-next');
+    nb.classList.remove('show'); S.answered=false;
+
+    // animate card
+    const card=document.getElementById('q-card');
+    card.classList.remove('fade-up'); void card.offsetWidth; card.classList.add('fade-up');
+
+    const secs=q.diff==='hard'?15:q.diff==='medium'?20:25;
+    startTimer(secs);
+}
+
+function startTimer(sec){
+    clearInterval(S.ti); S.tv=sec;
+    const ne=document.getElementById('t-num'), re=document.getElementById('t-ring');
+    const C=207; // 2*pi*33
+    function tick(){
+        ne.textContent=S.tv;
+        const p=S.tv/sec;
+        re.style.strokeDashoffset=C*(1-p);
+        re.style.stroke=p>.5?'var(--crimson)':p>.25?'#f97316':'#ef4444';
+        if(S.tv<=0){clearInterval(S.ti);if(!S.answered)answer(-1);return;}
+        S.tv--;
+    }
+    tick();
+    S.ti=setInterval(tick,1000);
+}
+
+function answer(idx){
+    if(S.answered)return;
+    S.answered=true; clearInterval(S.ti);
+    const q=S.qs[S.cur], isOk=idx===q.ans;
+    // flash
+    const fl=document.getElementById('flash');
+    fl.className='flash '+(isOk?'c':'w')+' show';
+    setTimeout(()=>fl.classList.remove('show'),400);
+    // highlight
+    document.querySelectorAll('.opt-btn').forEach((b,i)=>{
+        b.disabled=true;
+        if(i===q.ans)b.classList.add('correct');
+        if(i===idx&&!isOk){b.classList.add('wrong');b.classList.add('shake');}
+    });
+    if(isOk)S.score++;
+    document.getElementById('exp-text').textContent=q.exp;
+    document.getElementById('exp-box').classList.add('show');
+    const nb=document.getElementById('btn-next');
+    const isLast=S.cur===S.qs.length-1;
+    nb.innerHTML=isLast?'Lihat Hasil <span>→</span>':'Soal Berikutnya <span>→</span>';
+    nb.classList.add('show');
+}
+
+document.getElementById('btn-next').addEventListener('click',()=>{
+    if(S.cur===S.qs.length-1)showResult();
+    else{S.cur++;renderQ();}
+});
+
+// ─── RESULT ───
+function showResult(){
+    showScreen('screen-result');
+    const total=S.qs.length, score=S.score, pct=Math.round((score/total)*100);
+    setTimeout(()=>{document.getElementById('r-ring').style.strokeDashoffset=440*(1-pct/100);},300);
+    document.getElementById('r-score').textContent=score;
+    document.getElementById('r-total').textContent=total;
+    document.getElementById('s-cor').textContent=score;
+    document.getElementById('s-wrg').textContent=total-score;
+    document.getElementById('s-pct').textContent=pct+'%';
+
+    let g,gc,title,sub;
+    if(pct>=90){g='S';gc='S';title='Luar Biasa! 🔥';sub='Perfect! Kamu developer sejati.';}
+    else if(pct>=75){g='A';gc='A';title='Sangat Bagus! ⚡';sub='Kemampuanmu di atas rata-rata!';}
+    else if(pct>=55){g='B';gc='B';title='Cukup Baik! 👍';sub='Terus belajar, kamu pasti bisa lebih!';}
+    else{g='C';gc='C';title='Jangan Menyerah! 💪';sub='Belajar lagi dan coba tantang dirimu!';}
+
+    const ge=document.getElementById('r-grade');
+    ge.textContent=g; ge.className='grade-tag '+gc;
+    document.getElementById('r-title').textContent=title;
+    document.getElementById('r-sub').textContent=sub;
+    saveScore(score,total); renderLB();
+}
+
+function saveScore(score,total){
+    const KEY='rkr_quiz_lb';
+    let lb=JSON.parse(localStorage.getItem(KEY)||'[]');
+    lb.forEach(x=>x.isNew=false);
+    lb.unshift({score,total,pct:Math.round((score/total)*100),cat:S.cat,diff:S.diff,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short'}),isNew:true});
+    lb=lb.slice(0,10);
+    localStorage.setItem(KEY,JSON.stringify(lb));
+}
+
+function renderLB(){
+    const KEY='rkr_quiz_lb';
+    const lb=JSON.parse(localStorage.getItem(KEY)||'[]');
+    const el=document.getElementById('lb-list');
+    if(!lb.length){el.innerHTML='<p class="mono text-xs text-center py-4" style="color:rgba(240,235,225,0.25)">Belum ada riwayat quiz.</p>';return;}
+    const rc=['gold','silver','bronze'];
+    el.innerHTML=lb.map((s,i)=>`
+        <div class="lb-row ${s.isNew?'me':''}">
+            <div class="lb-rank ${rc[i]||'other'}">${i+1}</div>
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-0.5">
+                    <span class="font-bold text-sm">${s.score}/${s.total}</span>
+                    <span class="mono text-xs px-2 py-0.5 rounded-full" style="background:rgba(192,24,44,0.1);color:var(--crimson)">${s.pct}%</span>
+                    ${s.isNew?'<span class="mono text-xs px-2 py-0.5 rounded-full" style="background:rgba(34,197,94,0.1);color:#86efac;border:1px solid rgba(34,197,94,0.2)">BARU ✦</span>':''}
+                </div>
+                <div class="mono text-xs" style="color:rgba(240,235,225,0.28)">${s.date} · ${s.cat.toUpperCase()} · ${s.diff}</div>
+            </div>
+        </div>`).join('');
+}
+
+document.getElementById('btn-clear-lb').addEventListener('click',()=>{
+    localStorage.removeItem('rkr_quiz_lb');
+    renderLB();
+});
+document.getElementById('btn-retry').addEventListener('click',()=>showScreen('screen-start'));
+</script>
+</body>
+</html>
